@@ -8,6 +8,8 @@ class AbstractCard {
 	protected $_name = null;
 	protected $_value = null;
 
+	protected $_visible = true;
+
 	protected function __construct($suit, $name, $value){
 
 		$this->_suit = $suit;
@@ -39,6 +41,19 @@ class AbstractCard {
 		return substr($this->_suit, 0, 1);
 
 	}
+
+	public function getVisible(){
+
+		return $this->_visible;
+
+	}
+
+	public function setVisible($newValue){
+
+		$this->_visible = $newValue;
+
+	}
+
 
 	public function __toString(){
 

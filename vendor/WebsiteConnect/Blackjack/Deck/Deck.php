@@ -10,12 +10,33 @@ class Deck {
 	const INPUT_MAX = 3;
 
 	private $_cards = array();
+    private $_used = array();
 
-	public function __construct(){
+	public function __construct($shuffle = false){
 
 		$this->_fillDeck();
 
+		if ($shuffle)
+        	$this->shuffle();
+
 	}
+
+    public function getNewCard(){
+
+		$card = null;
+		$keys = array_keys($this->_cards);
+
+		// Iterate through the keys, but only use the first one.
+		foreach ($keys as $key){
+			$card = $this->_cards[$key];
+			$this->_used[] = $card;
+			unset($this->_cards[$key]);
+			break;
+		}
+
+        return $card;
+
+    }
 
 	private function _fillDeck(){
 
@@ -121,5 +142,22 @@ class Deck {
 		return $result;
 
 	}
+
+    public function shuffle(){
+
+        //shuffle($this->_cards);
+
+		$shuffled = array();
+		$keys = array_keys($this->_cards);
+
+		shuffle($keys);
+
+		foreach ($keys as $key)
+			$shuffled[$key] = $this->_cards[$key];
+
+		$this->_cards = $shuffled;
+
+    }
+
 
 }
