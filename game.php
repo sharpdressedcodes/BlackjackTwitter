@@ -22,12 +22,19 @@ if (empty($move)){
 	$dealer = new \WebsiteConnect\Blackjack\Player\Dealer(BlackjackDeck::BLACKJACK, BlackjackDeck::THRESHOLD);
 
     // give 2 cards to player
-    // give 2 cards to dealer (1 card flipped)
+    // give 2 cards to dealer (1 card hidden)
 
 	$player->addCard($deck->getNewCard());
 	$dealer->addCard($deck->getNewCard(), false);
+
 	$player->addCard($deck->getNewCard());
 	$dealer->addCard($deck->getNewCard());
+
+	// If player has blackjack, it's game over.
+	if ($player->getScore() === BlackjackDeck::BLACKJACK){
+		$dealer->showCards();
+		$dealerResult = $dealer->getScore();
+	}
 
 } else {
 
