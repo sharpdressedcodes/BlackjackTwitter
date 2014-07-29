@@ -3,7 +3,6 @@
 require_once('vendor/Autoloader.php');
 
 use \WebsiteConnect\Blackjack\Deck\Deck as BlackjackDeck;
-//use \WebsiteConnect\Blackjack\Core\AbstractException as BlackjackException;
 
 @session_start();
 
@@ -12,7 +11,7 @@ $dealerResult = '';
 $playerCardString = '';
 $dealerCardString = '';
 $move = getFromArray('move', $_POST);
-$deck = null;//new BlackjackDeck(true);
+$deck = null;
 $player = null;
 $dealer = null;
 
@@ -31,30 +30,22 @@ if (empty($move)){
 	$player->addCard($deck->getNewCard());
 	$dealer->addCard($deck->getNewCard());
 
-	// If player has blackjack, it's game over.
-	if ($player->getScore() === BlackjackDeck::BLACKJACK){
-		$dealer->showCards();
-		$dealerResult = $dealer->getScore();
-	}
-
 } else {
 
 	$deck = getFromArray('blackjack-deck', $_SESSION, false);
 	$player = getFromArray('blackjack-player', $_SESSION, false);
 	$dealer = getFromArray('blackjack-dealer', $_SESSION, false);
 
-	if (empty($deck)){
+	if (empty($deck))
 		die('Error retrieving deck from session.');
-	} elseif (empty($player)){
+	elseif (empty($player))
 		die('Error retrieving player from session.');
-	} elseif (empty($dealer)){
+	elseif (empty($dealer))
 		die('Error retrieving dealer from session.');
-	}
 
 	if (strtolower($move) === 'hit'){
 
-		if (!$player->isBust())
-			$player->addCard($deck->getNewCard());
+		$player->move($deck);
 
 	} else {
 
@@ -65,20 +56,9 @@ if (empty($move)){
 		} else {
 
 			$dealer->showCards();
-			$scoreToBeat = $player->getScore(); // in the real world, you would add the player's scores up
-
-			while (!$dealer->isBust() && !$dealer->isBlackjack() && $dealer->getScore() < $scoreToBeat){
-				$dealer->addCard($deck->getNewCard());
-			}
-
-			if ($dealer->isBust()){
-				$dealerResult = 'Bust!';
-			} elseif ($dealer->isBlackjack()){
-				$dealerResult = 'Blackjack!';
-			}
-
-			if (empty($dealerResult))
-				$dealerResult = $dealer->getScore();
+			$scoreToBeat = $player->getScore();
+			$dealer->move($deck, $scoreToBeat);
+			$dealerResult = $dealer->getScore(true);
 
 		}
 
@@ -92,15 +72,8 @@ $_SESSION['blackjack-dealer'] = $dealer;
 
 $playerCardString = $player->getCardsAsString();
 $dealerCardString = $dealer->getCardsAsString();
-
-if ($player->isBust()){
-	$playerResult = 'Bust!';
-} elseif ($player->isBlackjack()){
-	$playerResult = 'Blackjack!';
-}
-
 if (empty($playerResult))
-	$playerResult = $player->getScore();
+	$playerResult = $player->getScore(true);
 
 /*
  * Helper methods.

@@ -6,7 +6,6 @@ abstract class AbstractPlayer {
 
 	protected $_score = null;
 	protected $_cards = null;
-
 	protected $_limit = null;
 	protected $_threshold = null;
 
@@ -19,9 +18,23 @@ abstract class AbstractPlayer {
 
 	}
 
-	public function getScore(){
+	public abstract function move(\WebsiteConnect\Blackjack\Deck\Deck $deck, $scoreToBeat = null);
 
-		return $this->_score;
+	public function getScore($asLongString = false){
+
+		$score = null;
+
+		if ($asLongString){
+			if ($this->isBust())
+				$score = 'Bust!';
+			elseif ($this->isBlackjack())
+				$score = 'Blackjack!';
+		}
+
+		if (is_null($score))
+			$score = $this->_score;
+
+		return $score;
 
 	}
 
@@ -37,8 +50,8 @@ abstract class AbstractPlayer {
 		$i = 0;
 
 		foreach ($this->_cards as $card){
-			if ($card->getVisible()){
-				$result .= ($i > 0 ? $separator : '') . $card->getName() . ' ' . $card->getSuit();// $card->getValue();
+			if ($card->isVisible()){
+				$result .= ($i > 0 ? $separator : '') . $card;
 				$i++;
 			}
 		}

@@ -11,7 +11,6 @@ class Deck {
 	const INPUT_MAX = 3;
 
 	private $_cards = array();
-    private $_used = array();
 
 	public function __construct($shuffle = false){
 
@@ -30,7 +29,6 @@ class Deck {
 		// Iterate through the keys, but only use the first one.
 		foreach ($keys as $key){
 			$card = $this->_cards[$key];
-			$this->_used[] = $card;
 			unset($this->_cards[$key]);
 			break;
 		}
@@ -145,8 +143,6 @@ class Deck {
 	}
 
     public function shuffle(){
-
-        //shuffle($this->_cards);
 
 		$shuffled = array();
 		$keys = array_keys($this->_cards);

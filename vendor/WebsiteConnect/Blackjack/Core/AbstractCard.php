@@ -42,7 +42,7 @@ class AbstractCard {
 
 	}
 
-	public function getVisible(){
+	public function isVisible(){
 
 		return $this->_visible;
 
