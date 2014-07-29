@@ -12,12 +12,13 @@ $dealerResult = '';
 $playerCardString = '';
 $dealerCardString = '';
 $move = getFromArray('move', $_POST);
-$deck = new BlackjackDeck(true);
+$deck = null;//new BlackjackDeck(true);
 $player = null;
 $dealer = null;
 
 if (empty($move)){
 
+	$deck = new BlackjackDeck(true);
 	$player = new \WebsiteConnect\Blackjack\Player\Player(BlackjackDeck::BLACKJACK, BlackjackDeck::THRESHOLD);
 	$dealer = new \WebsiteConnect\Blackjack\Player\Dealer(BlackjackDeck::BLACKJACK, BlackjackDeck::THRESHOLD);
 
@@ -38,10 +39,13 @@ if (empty($move)){
 
 } else {
 
+	$deck = getFromArray('blackjack-deck', $_SESSION, false);
 	$player = getFromArray('blackjack-player', $_SESSION, false);
 	$dealer = getFromArray('blackjack-dealer', $_SESSION, false);
 
-	if (empty($player)){
+	if (empty($deck)){
+		die('Error retrieving deck from session.');
+	} elseif (empty($player)){
 		die('Error retrieving player from session.');
 	} elseif (empty($dealer)){
 		die('Error retrieving dealer from session.');
@@ -82,6 +86,7 @@ if (empty($move)){
 
 }
 
+$_SESSION['blackjack-deck'] = $deck;
 $_SESSION['blackjack-player'] = $player;
 $_SESSION['blackjack-dealer'] = $dealer;
 
