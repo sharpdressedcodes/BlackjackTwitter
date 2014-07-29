@@ -7,7 +7,13 @@ abstract class AbstractPlayer {
 	protected $_score = null;
 	protected $_cards = null;
 
-	public function __construct(){
+	protected $_limit = null;
+	protected $_threshold = null;
+
+	public function __construct($limit, $threshold){
+
+		$this->_limit = $limit;
+		$this->_threshold = $threshold;
 
 		$this->reset();
 
@@ -53,6 +59,24 @@ abstract class AbstractPlayer {
 
 		$this->score = 0;
 		$this->_cards = array();
+
+	}
+
+	public function isBust(){
+
+		return $this->_score > $this->_limit;
+
+	}
+
+	public function isBlackjack(){
+
+		return $this->_score === $this->_limit;
+
+	}
+
+	public function isAboveThreshold(){
+
+		return $this->_score >= $this->_threshold;
 
 	}
 

@@ -7,6 +7,7 @@ class Deck {
 	const DECK_NUM_MIN = 2;
 	const DECK_NUM_MAX = 10;
 	const BLACKJACK = 21;
+	const THRESHOLD = 17; // player must be equal to or above this score if they want to stop
 	const INPUT_MAX = 3;
 
 	private $_cards = array();

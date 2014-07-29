@@ -3,11 +3,10 @@
 require_once('vendor/Autoloader.php');
 
 use \WebsiteConnect\Blackjack\Deck\Deck as BlackjackDeck;
-use \WebsiteConnect\Blackjack\Core\AbstractException as BlackjackException;
+//use \WebsiteConnect\Blackjack\Core\AbstractException as BlackjackException;
 
 @session_start();
 
-$blackjackResult = '';
 $playerResult = '';
 $dealerResult = '';
 $playerCardString = '';
@@ -19,8 +18,8 @@ $dealer = null;
 
 if (empty($move)){
 
-	$player = new \WebsiteConnect\Blackjack\Player\Player();
-	$dealer = new \WebsiteConnect\Blackjack\Player\Dealer();
+	$player = new \WebsiteConnect\Blackjack\Player\Player(BlackjackDeck::BLACKJACK, BlackjackDeck::THRESHOLD);
+	$dealer = new \WebsiteConnect\Blackjack\Player\Dealer(BlackjackDeck::BLACKJACK, BlackjackDeck::THRESHOLD);
 
     // give 2 cards to player
     // give 2 cards to dealer (1 card flipped)
@@ -32,8 +31,8 @@ if (empty($move)){
 
 } else {
 
-	$player = getFromArray('blackjack-player', $_SESSION);
-	$dealer = getFromArray('blackjack-dealer', $_SESSION);
+	$player = getFromArray('blackjack-player', $_SESSION, false);
+	$dealer = getFromArray('blackjack-dealer', $_SESSION, false);
 
 	if (empty($player)){
 		die('Error retrieving player from session.');
@@ -43,69 +42,53 @@ if (empty($move)){
 
 	if (strtolower($move) === 'hit'){
 
-		try {
+		if (!$player->isBust())
 			$player->addCard($deck->getNewCard());
-		} catch (BlackjackException $e){
-			// can either get blackjack here or go over
-			// then its the dealers turn
-		}
 
 	} else {
 
-		$dealer->showCards();
+		if (!$player->isAboveThreshold()){
 
-		// dealer has to keep going until stop or bust.
+			$playerResult = 'You cannot stop before ' . BlackjackDeck::THRESHOLD;
 
-		try {
-			$dealer->addCard($deck->getNewCard());
-		} catch (BlackjackException $e){
+		} else {
 
+			$dealer->showCards();
+			$scoreToBeat = $player->getScore(); // in the real world, you would add the player's scores up
 
+			while (!$dealer->isBust() && !$dealer->isBlackjack() && $dealer->getScore() < $scoreToBeat){
+				$dealer->addCard($deck->getNewCard());
+			}
+
+			if ($dealer->isBust()){
+				$dealerResult = 'Bust!';
+			} elseif ($dealer->isBlackjack()){
+				$dealerResult = 'Blackjack!';
+			}
+
+			if (empty($dealerResult))
+				$dealerResult = $dealer->getScore();
 
 		}
 
-		$dealerResult = $dealer->getScore();
-
 	}
-
 
 }
 
-$_SESSION['blackjack-player'] = $player;//serialize($player);
-$_SESSION['blackjack-dealer'] = $dealer;//serialize($dealer);
+$_SESSION['blackjack-player'] = $player;
+$_SESSION['blackjack-dealer'] = $dealer;
 
 $playerCardString = $player->getCardsAsString();
 $dealerCardString = $dealer->getCardsAsString();
-$playerResult = $player->getScore();
-//$dealerResult = $dealer->getScore();
-//$playerCardString = implode('<br>', $playerCards);
-//$dealerCardString = implode('<br>', $dealerCards);
-//$playerResult = $deck->addCards($playerCards);
-//$dealerResult = $deck->addCards($dealerCards);
 
+if ($player->isBust()){
+	$playerResult = 'Bust!';
+} elseif ($player->isBlackjack()){
+	$playerResult = 'Blackjack!';
+}
 
-//if ($card1 !== '' && $card2 !== ''){
-//
-//    $deck = new BlackjackDeck();
-//    //$deck->shuffle();
-//
-//
-//    try {
-//
-//        // Pass the data to the Deck class. It is responsible for
-//        // parsing the input strings and turning them into cards.
-//        $blackjackResult = $deck->addCards(array($card1, $card2));
-//
-//        if ($blackjackResult === BlackjackDeck::BLACKJACK)
-//            $blackjackResult = 'Blackjack! ' . $blackjackResult;
-//
-//    } catch (BlackjackException $e){
-//
-//        $blackjackResult = "Error: " . $e->getMessage();
-//
-//    }
-//
-//}
+if (empty($playerResult))
+	$playerResult = $player->getScore();
 
 /*
  * Helper methods.
@@ -156,27 +139,37 @@ function sanitiseString($data){
     <h2>Blackjack</h2>
 	<table>
 		<tr>
-			<td>Player:</td>
-			<td>Dealer:</td>
+			<td><b>Player:</b></td>
+			<td><b>Dealer:</b></td>
 		</tr>
 		<tr>
-			<td><?php echo $playerCardString; ?></td>
-			<td><?php echo $dealerCardString; ?></td>
+			<td style="vertical-align: top;"><?php echo $playerCardString; ?></td>
+			<td style="vertical-align: top;"><?php echo $dealerCardString; ?></td>
 		</tr>
 		<tr>
 			<td><?php echo $playerResult; ?></td>
 			<td><?php echo $dealerResult; ?></td>
 		</tr>
 		<tr>
-			<td colspan="2">
-				<form method="post" action="game.php">
+			<td>
+				<form method="post" action="game.php" style="float:left;">
 					<input type="submit" name="move" value="Hit">
 				</form>
 
-				<form method="post" action="game.php">
+				<form method="post" action="game.php" style="float:left;">
 					<input type="submit" name="move" value="Stay">
 				</form>
 			</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td>
+				<br>
+				<form method="get" action="game.php">
+					<input type="submit" name="new" value="New Game">
+				</form>
+			</td>
+			<td>&nbsp;</td>
 		</tr>
 	</table>
 </div>
